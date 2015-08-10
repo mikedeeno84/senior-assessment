@@ -5,11 +5,10 @@ var expect = require('chai').expect;
 var supertest = require('supertest');
 var dbConnection = mongoose.connection;
 var Promise = require('bluebird');
+var User = require('../../server/models/user-model');
+var Message = require('../../server/models/message-model');
 
 describe('Server tests', function () {
-
-    var User = require('../../server/models/user-model');
-    var Message = require('../../server/models/message-model');
 
     before(function (done) {
         mongoose.connect('mongodb://localhost:27017/final-assessment-test');
@@ -63,10 +62,14 @@ describe('Server tests', function () {
             });
 
             xit('should have expected from definition', function () {
+                // This should be a reference field to a user document
+                // which requires more than just the ref being asserted here.
                 expect(schemaDefinition.from.ref).to.be.equal('User');
             });
 
             xit('should have expected to definition', function () {
+                // This should be a reference field to a user document
+                // which requires more than just the ref being asserted here.
                 expect(schemaDefinition.to.ref).to.be.equal('User');
             });
 
@@ -121,8 +124,8 @@ describe('Server tests', function () {
                     {email: 'joan@gmail.com'}
                 ];
                 User.create(users).then(function (createdUsers) {
-                    bobId = createdUsers[0];
-                    joanId = createdUsers[1];
+                    bobId = createdUsers[0]._id;
+                    joanId = createdUsers[1]._id;
                     done();
                 }, done);
             });
@@ -198,15 +201,20 @@ describe('Server tests', function () {
                         }, done);
                     });
 
-                    xit('should have the full information of both the sender and receiver', function (done) {
+                    xit('should POPULATE the full information of both the sender and receiver', function (done) {
                         Message.getAllWhereSender(joanId).then(function (messages) {
 
                             var theMessage = messages[0];
 
-                            expect(theMessage.to).to.be.an('object');
-                            expect(theMessage.to.email).to.be.equal('bob@gmail.com');
+                            // .to should not be an ObjectId
+                            expect(theMessage.to.toString()).to.not.be.equal(bobId.toString());
+                            // .from should not be an ObjectId
+                            expect(theMessage.from.toString()).to.not.be.equal(joanId.toString());
 
+                            expect(theMessage.to).to.be.an('object');
                             expect(theMessage.from).to.be.an('object');
+
+                            expect(theMessage.to.email).to.be.equal('bob@gmail.com');
                             expect(theMessage.from.email).to.be.equal('joan@gmail.com');
 
                             done();
@@ -266,11 +274,21 @@ describe('Server tests', function () {
         var app = require('../../server/app');
         var agent = supertest(app);
 
+        xit('should static serve the node_modules directory', function (done) {
+            agent
+                .get('/angular/angular.js')
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) return done(err);
+                    fs.readFile(path.join(__dirname, '../../node_modules/angular/angular.js'), 'utf8', function (err, contents) {
+                        if (err) return done(err);
+                        expect(res.text).to.be.equal(contents);
+                        done();
+                    });
+                });
+        });
+
         describe('/', function () {
-
-            beforeEach(function () {
-
-            });
 
             xit('should serve up index.html', function (done) {
                 agent
@@ -286,188 +304,174 @@ describe('Server tests', function () {
                     });
             });
 
-            xit('should static serve the node_modules directory', function (done) {
-                agent
-                    .get('/angular/angular.js')
-                    .expect(200)
-                    .end(function (err, res) {
-                        if (err) return done(err);
-                        fs.readFile(path.join(__dirname, '../../node_modules/angular/angular.js'), 'utf8', function (err, contents) {
-                            if (err) return done(err);
-                            expect(res.text).to.be.equal(contents);
-                            done();
-                        });
-                    });
+        });
+
+        describe('routes', function () {
+
+            var obama;
+            var biden;
+            beforeEach('Seed users', function (done) {
+                var users = [
+                    {email: 'obama@gmail.com'},
+                    {email: 'biden@gmail.com'}
+                ];
+                User.create(users).then(function (createdUsers) {
+                    obama = createdUsers[0]._id.toString();
+                    biden = createdUsers[1]._id.toString();
+                    done();
+                }, done);
             });
 
-            describe('routes', function () {
+            var obamaFirstMessage;
+            var bidenFirstMessage;
+            var obamaSecondMessage;
+            beforeEach('Seed messages', function (done) {
 
-                var obama;
-                var biden;
-                beforeEach('Seed users', function (done) {
-                    var users = [
-                        {email: 'obama@gmail.com'},
-                        {email: 'biden@gmail.com'}
-                    ];
-                    User.create(users).then(function (createdUsers) {
-                        obama = createdUsers[0]._id.toString();
-                        biden = createdUsers[1]._id.toString();
-                        done();
-                    }, done);
+                var messages = [
+                    {
+                        to: biden,
+                        from: obama,
+                        body: 'HEYOOOOOOO'
+                    },
+                    {
+                        to: obama,
+                        from: biden,
+                        body: 'WAAASSUUUUPP??'
+                    },
+                    {
+                        to: biden,
+                        from: obama,
+                        body: 'nmu?'
+                    }
+                ];
+
+                Message.create(messages).then(function (createdMessages) {
+                    obamaFirstMessage = createdMessages[0]._id.toString();
+                    bidenFirstMessage = createdMessages[1]._id.toString();
+                    obamaSecondMessage = createdMessages[2]._id.toString();
+                    done();
+                }, done);
+
+            });
+
+            afterEach('Remove users', function (done) {
+                User.remove({}, done);
+            });
+
+            afterEach('Remove messages', function (done) {
+                Message.remove({}, done);
+            });
+
+            describe('users', function () {
+
+                xit('should be implemented using a subrouter mounted on /users', function () {
+                    var usersRoute = app._router.stack.filter(function (entry) {
+                        return entry.regexp.toString().search('users') !== -1;
+                    })[0].handle;
+                    expect(usersRoute.name).to.be.equal('router');
                 });
 
-                var obamaFirstMessage;
-                var bidenFirstMessage;
-                var obamaSecondMessage;
-                beforeEach('Seed messages', function (done) {
-
-                    var messages = [
-                        {
-                            to: biden,
-                            from: obama,
-                            body: 'HEYOOOOOOO'
-                        },
-                        {
-                            to: obama,
-                            from: biden,
-                            body: 'WAAASSUUUUPP??'
-                        },
-                        {
-                            to: biden,
-                            from: obama,
-                            body: 'nmu?'
-                        }
-                    ];
-
-                    Message.create(messages).then(function (createdMessages) {
-                        obamaFirstMessage = createdMessages[0]._id.toString();
-                        bidenFirstMessage = createdMessages[1]._id.toString();
-                        obamaSecondMessage = createdMessages[2]._id.toString();
-                        done();
-                    }, done);
-
+                xit('should serve up all users on request to GET /', function (done) {
+                    agent
+                        .get('/users')
+                        .expect(200)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+                            expect(res.body).to.be.an('array');
+                            expect(res.body.length).to.be.equal(2);
+                            expect(res.body[0]._id.toString()).to.be.equal(obama);
+                            expect(res.body[1]._id.toString()).to.be.equal(biden);
+                            done();
+                        });
                 });
 
-                afterEach('Remove users', function (done) {
-                    User.remove({}, done);
-                });
-
-                afterEach('Remove messages', function (done) {
-                    Message.remove({}, done);
-                });
-
-                describe('users', function () {
-
-                    xit('should be implemented using a subrouter mounted on /users', function () {
-                        var usersRoute = app._router.stack.filter(function (entry) {
-                            return entry.regexp.toString().search('users') !== -1;
-                        })[0].handle;
-                        expect(usersRoute.name).to.be.equal('router');
-                    });
-
-                    xit('should serve up all users on request to GET /', function (done) {
-                        agent
-                            .get('/users')
-                            .expect(200)
-                            .end(function (err, res) {
-                                if (err) return done(err);
-                                expect(res.body).to.be.an('array');
-                                expect(res.body.length).to.be.equal(2);
-                                expect(res.body[0]._id.toString()).to.be.equal(obama);
-                                expect(res.body[1]._id.toString()).to.be.equal(biden);
+                xit('should update a user at PUT /{{usersId}}, send a 201 response', function (done) {
+                    agent
+                        .put('/users/' + obama)
+                        .send({
+                            email: 'potus@hotmail.com'
+                        })
+                        .expect(201)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+                            User.findById(obama).exec().then(function (user) {
+                                expect(user.email).to.be.equal('potus@hotmail.com');
                                 done();
-                            });
-                    });
-
-                    xit('should update a user at PUT /{{usersId}}, send a 201 response', function (done) {
-                        agent
-                            .put('/users/' + obama)
-                            .send({
-                                email: 'potus@hotmail.com'
-                            })
-                            .expect(201)
-                            .end(function (err, res) {
-                                if (err) return done(err);
-                                User.findById(obama).exec().then(function (user) {
-                                    expect(user.email).to.be.equal('potus@hotmail.com');
-                                    done();
-                                }, done);
-                            });
-                    });
-
+                            }, done);
+                        });
                 });
 
-                describe('messages', function () {
+            });
 
-                    xit('should be implemented using a subrouter mounted on /messages', function () {
-                        var usersRoute = app._router.stack.filter(function (entry) {
-                            return entry.regexp.toString().search('messages') !== -1;
-                        })[0].handle;
-                        expect(usersRoute.name).to.be.equal('router');
-                    });
+            describe('messages', function () {
 
-                    xit('should serve up all messages (with filled in references) to a specific user on GET /to/{{recipientId}}', function (done) {
-                        agent
-                            .get('/messages/to/' + obama)
-                            .expect(200)
-                            .end(function (err, res) {
-                                if (err) return done(err);
-                                expect(res.body).to.be.an('array');
-                                expect(res.body.length).to.be.equal(1);
-                                expect(res.body[0].from.email).to.be.equal('biden@gmail.com');
-                                expect(res.body[0].to.email).to.be.equal('obama@gmail.com');
-                                expect(res.body[0].body).to.be.equal('WAAASSUUUUPP??');
-                                done();
-                            });
-                    });
+                xit('should be implemented using a subrouter mounted on /messages', function () {
+                    var usersRoute = app._router.stack.filter(function (entry) {
+                        return entry.regexp.toString().search('messages') !== -1;
+                    })[0].handle;
+                    expect(usersRoute.name).to.be.equal('router');
+                });
 
-                    xit('should serve up all messages from a specific sender on GET /from/{{senderId}}\
+                xit('should serve up all messages (WITH FILLED IN REFERENCES) to a specific user on GET /to/{{recipientId}}', function (done) {
+                    agent
+                        .get('/messages/to/' + obama)
+                        .expect(200)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+                            expect(res.body).to.be.an('array');
+                            expect(res.body.length).to.be.equal(1);
+                            expect(res.body[0].from.email).to.be.equal('biden@gmail.com');
+                            expect(res.body[0].to.email).to.be.equal('obama@gmail.com');
+                            expect(res.body[0].body).to.be.equal('WAAASSUUUUPP??');
+                            done();
+                        });
+                });
+
+                xit('should serve up all messages from a specific sender on GET /from/{{senderId}}\
                         and use the Message model static getAllWhereSender in the process', function (done) {
 
-                        var sinon = require('sinon');
-                        var spy = sinon.spy(Message, 'getAllWhereSender');
+                    var sinon = require('sinon');
+                    var getAllWhereSenderSpy = sinon.spy(Message, 'getAllWhereSender');
 
-                        agent
-                            .get('/messages/from/' + obama)
-                            .expect(200)
-                            .end(function (err, res) {
+                    agent
+                        .get('/messages/from/' + obama)
+                        .expect(200)
+                        .end(function (err, res) {
 
-                                if (err) return done(err);
+                            if (err) return done(err);
 
-                                expect(res.body).to.be.an('array');
-                                expect(res.body.length).to.be.equal(2);
+                            expect(res.body).to.be.an('array');
+                            expect(res.body.length).to.be.equal(2);
 
-                                expect(spy.called).to.be.equal(true);
-                                expect(spy.calledWith(obama)).to.be.equal(true);
+                            expect(getAllWhereSenderSpy.called).to.be.equal(true);
+                            expect(getAllWhereSenderSpy.calledWith(obama)).to.be.equal(true);
 
-                                spy.restore();
-                                done();
+                            getAllWhereSenderSpy.restore();
+                            done();
 
-                            });
+                        });
 
-                    });
+                });
 
-                    xit('should add a new message on POST /, respond with 201 and created message', function (done) {
+                xit('should add a new message on POST /, respond with 201 and created message', function (done) {
 
-                        agent
-                            .post('/messages')
-                            .send({
-                                from: biden,
-                                to: obama,
-                                body: 'You are my best friend. I hope you know that.'
-                            })
-                            .expect(201)
-                            .end(function (err, res) {
-                                if (err) return done(err);
-                                var createdMessage = res.body;
-                                Message.findById(createdMessage._id).exec()
-                                    .then(function (foundMessage) {
-                                        expect(foundMessage.body).to.be.equal('You are my best friend. I hope you know that.');
-                                        done();
-                                    }, done);
-                            });
-
-                    });
+                    agent
+                        .post('/messages')
+                        .send({
+                            from: biden,
+                            to: obama,
+                            body: 'You are my best friend. I hope you know that.'
+                        })
+                        .expect(201)
+                        .end(function (err, res) {
+                            if (err) return done(err);
+                            var createdMessage = res.body;
+                            Message.findById(createdMessage._id).exec()
+                                .then(function (foundMessage) {
+                                    expect(foundMessage.body).to.be.equal('You are my best friend. I hope you know that.');
+                                    done();
+                                }, done);
+                        });
 
                 });
 
@@ -478,4 +482,3 @@ describe('Server tests', function () {
     });
 
 });
-

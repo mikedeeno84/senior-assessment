@@ -4,7 +4,8 @@
   "author": "Fullstack Instructors",
   "scripts": {
     "test": "mocha ./tests/server",
-    "browser-test": "karma start ./tests/browser/karma.conf.js"
+    "browser-test": "karma start ./tests/browser/karma.conf.js",
+    "extra-credit": "mocha ./tests/extra-credit"
   },
   "devDependencies": {
     "angular-mocks": "^1.4.3",
@@ -18,14 +19,15 @@
     "karma-phantomjs-launcher": "^0.2.1",
     "mocha": "^2.2.5",
     "phantomjs": "^1.9.17",
-    "sinon": "^1.15.4",
+    "sinon": "^1.17.2",
     "superagent": "^1.3.0",
     "supertest": "^1.0.1"
   },
   "dependencies": {
     "angular": "^1.4.3",
     "angular-ui-router": "^0.2.15",
-    "body-parser": "^1.13.3",
+    "body-parser": "^1.14.2",
+    "es6-promise": "^3.0.2",
     "express": "^4.13.3",
     "mongoose": "^4.1.1"
   }
