@@ -38,12 +38,12 @@ describe('NewMessageController', function () {
 
     describe('initalization', function () {
 
-        xit('should put on $scope.messages an empty array', function () {
+        it('should put on $scope.messages an empty array', function () {
             expect(controllersScope.messages).to.be.an('array');
             expect(controllersScope.messages.length).to.be.equal(0);
         });
 
-        xit('should put on $scope.submitMessage a function', function () {
+        it('should put on $scope.submitMessage a function', function () {
             expect(controllersScope.submitMessage).to.be.a('function');
         });
 
@@ -51,13 +51,13 @@ describe('NewMessageController', function () {
 
     describe('submitMessage function when invoked', function () {
 
-        xit('should call MessagesFactory.sendMessage with $scope.currentMessage', function () {
+        it('should call MessagesFactory.sendMessage with $scope.currentMessage', function () {
             controllersScope.currentMessage = {body: 'Hey! Listen!'};
             controllersScope.submitMessage();
             expect(MessagesFactory.sendMessage.calledWith(controllersScope.currentMessage)).to.be.equal(true);
         });
 
-        xit('should use the resolved value from MessagesFactory.sendMessage\
+        it('should use the resolved value from MessagesFactory.sendMessage\
             and add it to the messages array', function () {
             controllersScope.currentMessage = {body: 'Hullllooooo'};
             controllersScope.submitMessage();

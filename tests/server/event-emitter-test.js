@@ -18,21 +18,21 @@ describe('Event Emitter', function () {
 
     describe('prototype', function () {
 
-        xit('should include .emit', function () {
+        it('should include .emit', function () {
             expect(EventEmitter.prototype.emit).to.be.a('function');
         });
 
-        xit('should include .on', function () {
+        it('should include .on', function () {
             expect(EventEmitter.prototype.on).to.be.a('function');
         });
 
-        xit('should include .removeListener', function () {
+        it('should include .removeListener', function () {
             expect(EventEmitter.prototype.on).to.be.a('function');
         });
 
     });
 
-    xit('should be able to register a listener using .on ' +
+    it('should be able to register a listener using .on ' +
         'and broadcast an event with .emit', function () {
 
         var spy = sinon.spy();
@@ -55,7 +55,7 @@ describe('Event Emitter', function () {
 
     });
 
-    xit('should be able to call a registered listener multiple times', function () {
+    it('should be able to call a registered listener multiple times', function () {
 
         var spy = sinon.spy();
 
@@ -84,7 +84,7 @@ describe('Event Emitter', function () {
 
     });
 
-    xit('should be able to call a register multiple listeners to the same event', function () {
+    it('should be able to call a register multiple listeners to the same event', function () {
 
         var spy1 = sinon.spy();
         var spy2 = sinon.spy();
@@ -117,7 +117,7 @@ describe('Event Emitter', function () {
 
     });
 
-    xit('should call listeners with all the arguments passed to emit except the event name', function () {
+    it('should call listeners with all the arguments passed to emit except the event name', function () {
 
         var spy = sinon.spy();
 
@@ -146,7 +146,7 @@ describe('Event Emitter', function () {
 
     });
 
-    xit('should be able to remove listeners by using .removeListener', function () {
+    it('should be able to remove listeners by using .removeListener', function () {
 
         var spy = sinon.spy();
         var spy2 = sinon.spy();

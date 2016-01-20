@@ -10,7 +10,7 @@ describe('<message> directive', function () {
         parentScope = $rootScope.$new();
     }));
 
-    xit('should be an element directive that uses\
+    it('should be an element directive that uses\
         browser/directives/message.html as its templateUrl', function () {
         expect(directiveDefinition.restrict).to.be.equal('E');
         expect(directiveDefinition.templateUrl).to.be.equal('browser/directives/message.html');
@@ -42,7 +42,7 @@ describe('<message> directive', function () {
         });
 
         // Reference the html in the above beforeEach for more information.
-        xit('should use isolate scope that sets "emailMessage" from the parent scope', function () {
+        it('should use isolate scope that sets "emailMessage" from the parent scope', function () {
             var directivesIsolateScope = directiveElement.isolateScope();
             expect(directivesIsolateScope).to.be.an('object');
             expect(directivesIsolateScope.emailMessage).to.be.equal(parentScope.theMessage);
@@ -50,7 +50,7 @@ describe('<message> directive', function () {
 
         // IMPORTANT NOTE: ui-sref will not work here. Try something else.
         // HINT: Look at the template for this directive.
-        xit('should go to a state called "messageView" with the message\'s _id as the $stateParams.id\
+        it('should go to a state called "messageView" with the message\'s _id as the $stateParams.id\
             when the full messages div is clicked', function (done) {
 
             $rootScope.$on('$stateChangeStart', function (event, toState, toStateParams) {

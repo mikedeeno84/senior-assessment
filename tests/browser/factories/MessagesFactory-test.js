@@ -8,7 +8,7 @@ describe('MessagesFactory', function () {
         MessagesFactory = _MessagesFactory_;
     }));
 
-    xit('should be an object', function () {
+    it('should be an object', function () {
         expect(MessagesFactory).to.be.an('object');
     });
 
@@ -33,12 +33,12 @@ describe('MessagesFactory', function () {
             $httpBackend.verifyNoOutstandingExpectation();
         });
 
-        xit('should make the expected request when called', function () {
+        it('should make the expected request when called', function () {
             MessagesFactory.getMessagesFrom(userId);
             $httpBackend.flush();
         });
 
-        xit('should return a promise that resolves to the data of the response', function (done) {
+        it('should return a promise that resolves to the data of the response', function (done) {
             MessagesFactory.getMessagesFrom(userId).then(function (messages) {
                 expect(messages).to.be.deep.equal(responseData);
                 done();
@@ -67,12 +67,12 @@ describe('MessagesFactory', function () {
             $httpBackend.verifyNoOutstandingExpectation();
         });
 
-        xit('should make the expected POST request with expected data', function () {
+        it('should make the expected POST request with expected data', function () {
             MessagesFactory.sendMessage(messageDataToSend);
             $httpBackend.flush();
         });
 
-        xit('should return a promise that resolves once a response has been generated', function () {
+        it('should return a promise that resolves once a response has been generated', function () {
             var promise = MessagesFactory.sendMessage(messageDataToSend);
             expect(promise.$$state.status).to.be.equal(0 /*Pending*/);
             $httpBackend.flush();

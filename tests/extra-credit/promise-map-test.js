@@ -21,11 +21,11 @@ require('../../extra-credit/promise-map');
 
 describe('Promise.map', function () {
 
-    xit('should be a function', function () {
+    it('should be a function', function () {
         expect(Promise.map).to.be.a('function');
     });
 
-    xit('should return a promise', function () {
+    it('should return a promise', function () {
         var returnValue = Promise.map(['./package.json'], function () {
             return true;
         });
