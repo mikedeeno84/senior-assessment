@@ -1,6 +1,6 @@
 Welcome to your final assessment at Fullstack Academy!
 
-You will have *3 hours* to complete this assessment.
+You will have **3 hours** to complete this assessment.
 
 ## Resources
 
@@ -17,6 +17,10 @@ Please make sure you complete specs located in the following files:
 `tests/browser/controllers/NewMessageController-test.js`
 
 `tests/browser/directives/message-test.js`
+
+## Extra Credit
+
+For the brave, the extra credit (implementing Promise.map) is available in `tests/extra-credit`.
 
 ## Getting started
 
