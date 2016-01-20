@@ -44,4 +44,4 @@ npm run browser-test
 
 ## Submit
 
-Push your code to github.
+Push your code to github and email REPO LINK (no zip required) to joe@fullstackacademy.com
