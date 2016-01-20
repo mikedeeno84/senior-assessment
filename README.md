@@ -20,7 +20,7 @@ Please make sure you complete specs located in the following files:
 
 ## Extra Credit
 
-For the brave, the extra credit (implementing Promise.map) is available in `tests/extra-credit`.
+For the brave, the extra credit (implementing Promise.map) is available in `tests/extra-credit`. Run with `npm run extra-credit`.
 
 ## Getting started
 
